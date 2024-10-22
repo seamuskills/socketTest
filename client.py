@@ -12,7 +12,7 @@ send = ""
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
     sock.connect_ex((ip, port))
     sock.setblocking(False)
-    while send != b'q':
+    while send != 'quit':
         if msvcrt.kbhit():
             char = msvcrt.getch()
             if char == b'\r':
