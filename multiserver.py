@@ -2,6 +2,7 @@ import socket
 import sys
 import selectors
 import types
+import msvcrt
 
 sel = selectors.DefaultSelector()
 
@@ -15,6 +16,7 @@ sel.register(lsock, selectors.EVENT_READ, data=None)
 
 
 def accept_wrapper(sock):
+    sock.setblocking(False)
     conn, addr = sock.accept()
     print(f"New connection from {(conn, addr)}")
     conn.setblocking(False)
@@ -43,12 +45,15 @@ def service_connection(key, mask):
 
 try:
     while True:
-        events = sel.select(timeout=None)
+        events = sel.select(timeout=0.5)
         for key, mask in events:
             if key.data is None:
                 accept_wrapper(key.fileobj)
             else:
                 service_connection(key, mask)
+        if msvcrt.kbhit(): #select makes ctrl+c not work for some reason, so this is a good workaround
+            if msvcrt.getch() == b'q':
+                raise KeyboardInterrupt
 except KeyboardInterrupt:
     print("exiting...")
 finally:
