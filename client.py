@@ -1,17 +1,26 @@
-import socket, msvcrt
+import socket, msvcrt, sys
 
-ip = "127.0.0.1"
+
+if len(sys.argv) == 1:
+    ip = input("Connect to ip:")
+else:
+    ip = sys.argv[1]
 port = 8080
 
-send = None
+send = ""
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
     sock.connect_ex((ip, port))
     sock.setblocking(False)
     while send != b'q':
         if msvcrt.kbhit():
-            send = msvcrt.getch()
-            sock.sendall(send)
+            char = msvcrt.getch()
+            if char == b'\r':
+                sock.sendall(bytes(send, "utf-8"))
+                send = ""
+            else:
+                send += char.decode("utf-8")
+                print(send)
         try:
             data = sock.recv(1024)
         except ConnectionAbortedError:
