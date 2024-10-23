@@ -1,3 +1,4 @@
+import os
 import socket, msvcrt, sys
 
 
@@ -12,15 +13,22 @@ send = ""
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
     sock.connect_ex((ip, port))
     sock.setblocking(False)
+    try:
+        print(f'[connected to {sock.getpeername()}]')
+    except OSError:
+        print("could not connect to the server.")
+        sys.exit()
     while send != 'quit':
         if msvcrt.kbhit():
             char = msvcrt.getch()
             if char == b'\r':
                 sock.sendall(bytes(send, "utf-8"))
                 send = ""
+            elif char == b'\x08':
+                send = send[:len(send) - 1]
             else:
                 send += char.decode("utf-8")
-                print(send)
+        print(f'\r> {send}', end='', flush=True)
         try:
             data = sock.recv(1024)
             if data == b'':
