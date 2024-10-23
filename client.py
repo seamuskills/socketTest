@@ -23,6 +23,8 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
                 print(send)
         try:
             data = sock.recv(1024)
+            if data == b'':
+                raise ConnectionAbortedError
         except ConnectionAbortedError:
             print("Couldn't connect to server, maybe server session stopped?")
             break
